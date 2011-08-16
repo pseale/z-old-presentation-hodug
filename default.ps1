@@ -81,23 +81,24 @@ function Generate-AssemblyInfo {
     [string]$file = $(throw "file is a required parameter.")
     )
       $commit = Get-GitCommit
-      $asmInfo = "using System;
-    using System.Reflection;
-    using System.Runtime.CompilerServices;
-    using System.Runtime.InteropServices;
+      $asmInfo = @"
+using System;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
-    [assembly: CLSCompliantAttribute($clsCompliant )]
-    [assembly: ComVisibleAttribute(false)]
-    [assembly: AssemblyTitleAttribute(""$title"")]
-    [assembly: AssemblyDescriptionAttribute(""$description"")]
-    [assembly: AssemblyCompanyAttribute(""$company"")]
-    [assembly: AssemblyProductAttribute(""$product"")]
-    [assembly: AssemblyCopyrightAttribute(""$copyright"")]
-    [assembly: AssemblyVersionAttribute(""$version"")]
-    [assembly: AssemblyInformationalVersionAttribute(""$version / $commit"")]
-    [assembly: AssemblyFileVersionAttribute(""$version"")]
-    [assembly: AssemblyDelaySignAttribute(false)]
-    "
+[assembly: CLSCompliantAttribute($clsCompliant )]
+[assembly: ComVisibleAttribute(false)]
+[assembly: AssemblyTitleAttribute("$title")]
+[assembly: AssemblyDescriptionAttribute("$description")]
+[assembly: AssemblyCompanyAttribute("$company")]
+[assembly: AssemblyProductAttribute("$product")]
+[assembly: AssemblyCopyrightAttribute("$copyright")]
+[assembly: AssemblyVersionAttribute("$version")]
+[assembly: AssemblyInformationalVersionAttribute("$version / $commit")]
+[assembly: AssemblyFileVersionAttribute("$version")]
+[assembly: AssemblyDelaySignAttribute(false)]
+"@
 
     $dir = [System.IO.Path]::GetDirectoryName($file)
     if ([System.IO.Directory]::Exists($dir) -eq $false)
