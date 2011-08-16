@@ -17,3 +17,4 @@ artifacts
 artifacts/*
 build
 build/*
+MvcApplication3/Properties/AssemblyInfo.cs

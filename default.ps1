@@ -24,6 +24,16 @@ properties {
   }
 }
 
+task clean {
+  Compile-Project -msbuildTargetsString "Clean"
+  del $buildOutputDirectory -recurse -force -erroraction SilentlyContinue
+  del $packageOutputDirectory -recurse -force -erroraction SilentlyContinue
+  #what else would you put here? 
+  #-Delete the local db?
+  #-Clear local cache or other oddball filesystem artifacts you may have?
+  #-Shut down IIS? Or at least, bump your app pool?
+}
+
 task default -depends build
 
 #default build - build deployable package with MSDeploy
@@ -32,7 +42,7 @@ task build {
 }
 
 task buildWithManualXmlEdits {
-    if ($environment -eq $null) { throw "Environment parameter is null but must somehow be set to run a build with manual XML edits!" }
+    if ($environment -eq $null) { throw 'Environment parameter is null but must be set to run a build with manual XML edits! Call psake with it set, e.g. ''psake -parameters @{"environment"="dev"}''' }
     Compile-Project -msbuildTargetsString "Build"
     Copy -recurse -path ([IO.Path]::Combine($buildOutputDirectory, "_PublishedWebsites\MvcApplication3")) -destination $packageOutputDirectory
     Change-WebConfigUsingNativeXmlSupport -folder $packageOutputDirectory -environment $environment
