@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Web;
+﻿using System.Configuration;
 using System.Web.Mvc;
 
 namespace MvcApplication3.Controllers
@@ -12,7 +8,7 @@ namespace MvcApplication3.Controllers
     {
         public ActionResult Index()
         {
-            ViewData["Message"] = "Welcome to ASP.NET MVC, " + ConfigurationSettings.AppSettings["VIPName"];
+            ViewData["Message"] = "Welcome to ASP.NET MVC, " + ConfigurationManager.AppSettings["VIPName"];
 
             return View();
         }

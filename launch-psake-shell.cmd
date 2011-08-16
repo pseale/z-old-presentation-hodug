@@ -1,0 +1,1 @@
+powershell.exe -noexit -ExecutionPolicy RemoteSigned -command import-module .\packages\psake.4.0.1.0\tools\psake.psm1;Set-Alias -Name psake -Value Invoke-psake;cls;Write-Host -nonewline 'Welcome to the psake shell! For help, type: '; write-host -foregroundcolor yellow 'help psake -full'

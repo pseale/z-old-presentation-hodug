@@ -13,3 +13,7 @@ _ReSharper.*
 ~$*
 Thumbs.db
 TestResult.xml
+artifacts
+artifacts/*
+build
+build/*
