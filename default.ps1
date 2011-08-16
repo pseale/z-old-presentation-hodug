@@ -1,7 +1,7 @@
 properties {
   $buildDropFolder = 'C:\temp\build'
   $packageDropFolder = 'C:\temp\package'
-  $environments = @('dev', 'qa', 'staging', 'test', 'training', 'acceptance')
+  $environments = @('dev', 'qa', 'staging', 'test', 'training', 'acceptance', 'prod')
   
   $appSettings = @{
     "dev" = @{ "VIPName" = "Peter in our DEV ENVIRONMENT" };
@@ -26,10 +26,17 @@ task build -depends compile {
         mkdir $folder
         copy -force -recurse $buildDropFolder $folder
         Change-WebConfigUsingNativeXmlSupport $folder $_
+        if ($_ -eq "prod") {
+          Create-ITILSoxAuditorCompliantDeployScript
+        }
     }
 }
 
+task dbmigrate {
+}
+
 task deploy {
+  #(Continuous Deployment) deploy from CI build to dev environment automatically
   powershell ./deploy.ps1 -name dev6 -port 81 -sourceFolder "'$buildDropFolder'"
 }
 
