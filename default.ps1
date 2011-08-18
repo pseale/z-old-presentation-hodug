@@ -40,35 +40,13 @@ task default -depends build
 
 #default build - build deployable package with MSDeploy
 task build {
-    Get-AssemblyInfoFiles | foreach {
-        write-host "CHANGING ASSEMBLYINFO.CS FILE AT: '$($_.fullname)'"
-        $assemblyInfo["file"] = $_.fullname
-        Generate-AssemblyInfo @assemblyInfo #Note "@" is the splatting operator. This means dictionary keys of the "$assemblyInfo" hashtable are matched up against function args.
-    }
-    
-    Run-MSBuild -project 'DemoWebApp\DemoWebApp.csproj' -targets "Build" -configuration "Release" -outdir $buildOutputDirectory
-    Get-AssemblyInfoFiles | foreach {
-      git checkout """$($_.fullname)"""
-    }
-    Run-MSBuild -project 'DemoWebApp.Tests\DemoWebApp.Tests.csproj' -targets "Build" -configuration "Debug" -outdir $testResultsDirectory
-    Run-NUnit -filename ([IO.Path]::Combine($testResultsDirectory, "DemoWebApp.Tests.dll"))
+  Compile-Project -compilationTarget "Package"
 }
 
 task deployithManualXmlEdits {
     if ($environment -eq $null) { throw 'Environment parameter is null but must be set to run a build with manual XML edits! Call psake with it set, e.g. ''psake -parameters @{"environment"="dev"}''' }
 
-    Get-AssemblyInfoFiles | foreach {
-        write-host "CHANGING ASSEMBLYINFO.CS FILE AT: '$($_.fullname)'"
-        $assemblyInfo["file"] = $_.fullname
-        Generate-AssemblyInfo @assemblyInfo #Note "@" is the splatting operator. This means dictionary keys of the "$assemblyInfo" hashtable are matched up against function args.
-    }
-    
-    Run-MSBuild -project 'DemoWebApp\DemoWebApp.csproj' -targets "Build" -configuration "Release" -outdir $buildOutputDirectory
-    Get-AssemblyInfoFiles | foreach {
-      git checkout """$($_.fullname)"""
-    }
-    Run-MSBuild -project 'DemoWebApp.Tests\DemoWebApp.Tests.csproj' -targets "Build" -configuration "Debug" -outdir $testResultsDirectory
-    Run-NUnit -filename ([IO.Path]::Combine($testResultsDirectory, "DemoWebApp.Tests.dll"))
+  Compile-Project -compilationTarget "Build"
     
     Copy -recurse -path ([IO.Path]::Combine($buildOutputDirectory, "_PublishedWebsites\MvcApplication3")) -destination $packageOutputDirectory
     Change-WebConfigUsingNativeXmlSupport -folder $packageOutputDirectory -environment $environment
@@ -84,6 +62,21 @@ task deploy {
 
 
 #-=-=-=-=-=-=-=-=- -=-=-=-=-=-=-=-=- -=-=-=-=-=-=-=-=- -=-=-=-=-=-=-=-=- -=-=-=-=-=-=-=-=-
+
+function Compile-Project($compilationTarget) {
+    Get-AssemblyInfoFiles | foreach {
+        write-host "CHANGING ASSEMBLYINFO.CS FILE AT: '$($_.fullname)'"
+        $assemblyInfo["file"] = $_.fullname
+        Generate-AssemblyInfo @assemblyInfo #Note "@" is the splatting operator. This means dictionary keys of the "$assemblyInfo" hashtable are matched up against function args.
+    }
+    
+    Run-MSBuild -project 'DemoWebApp\DemoWebApp.csproj' -targets $compilationTarget -configuration "Release" -outdir $buildOutputDirectory
+    Get-AssemblyInfoFiles | foreach {
+      git checkout """$($_.fullname)"""
+    }
+    Run-MSBuild -project 'DemoWebApp.Tests\DemoWebApp.Tests.csproj' -targets "Build" -configuration "Debug" -outdir $testResultsDirectory
+    Run-NUnit -filename ([IO.Path]::Combine($testResultsDirectory, "DemoWebApp.Tests.dll"))
+}
 
 function Get-AssemblyInfoFiles {
   dir -path $baseDirectory -include "AssemblyInfo.cs" -recurse
