@@ -12,7 +12,10 @@ _ReSharper.*
 *.cache
 ~$*
 Thumbs.db
+TestResults
+TestResults/*
 TestResult.xml
+TestResults.xml
 artifacts
 artifacts/*
 build
