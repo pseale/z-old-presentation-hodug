@@ -3,6 +3,7 @@ properties {
   $buildOutputDirectory = ([IO.Path]::Combine($baseDirectory, "build"))
   $packageOutputDirectory = ([IO.Path]::Combine($baseDirectory, "artifacts"))
   $testResultsDirectory = ([IO.Path]::Combine((resolve-path .), "TestResults"))
+  $testResultsFile = ([IO.Path]::Combine($testResultsDirectory, "TestResults.xml"))
   $environments = @('dev', 'qa', 'staging', 'test', 'training', 'acceptance', 'prod')
   $versionNumber = "1.1.1.1" #Don't do this. for real version numbers, generate the version number in TeamCity and pass it into the script as an argument somehow.
   $assemblyInfo = @{
@@ -94,7 +95,7 @@ function Run-MSBuild($project, $targets, $configuration, $outdir) {
 #stolen from http://codecampserver.codeplex.com/SourceControl/changeset/view/4755c1386bff#default.ps1
 function Run-NUnit($filename)
 {
-    exec { & '.\packages\NUnit.2.5.10.11092\tools\nunit-console.exe' """$filename""" '/nologo' '/nodots' '/xml=TestResults.xml' }
+    exec { & '.\packages\NUnit.2.5.10.11092\tools\nunit-console.exe' """$filename""" '/nologo' '/nodots' "/xml=""$testResultsFile""" }
 }
 
 #stolen from Ayende's rhino-esb psake script
