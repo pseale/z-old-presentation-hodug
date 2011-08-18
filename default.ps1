@@ -66,7 +66,9 @@ function Compile-Project($msbuildTargetsString) {
         Generate-AssemblyInfo @assemblyInfo #Note "@" is the splatting operator. This means dictionary keys of the "$assemblyInfo" hashtable are matched up against function args.
     }
     
-  & 'C:\windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe' 'MvcApplication3\MvcApplication3.csproj' "/t:$($msbuildTargetsString)" "/p:OutDir=$($buildOutputDirectory)\"
+  exec { 
+    & 'C:\windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe' 'DemoWebApp\DemoWebApp.csproj' "/t:$($msbuildTargetsString)" "/p:OutDir=$($buildOutputDirectory)\"
+  }
 }
 
 function Generate-AssemblyInfo {
