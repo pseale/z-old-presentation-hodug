@@ -8,7 +8,8 @@ namespace MvcApplication3.Controllers
     {
         public ActionResult Index()
         {
-            ViewData["Message"] = "Welcome to ASP.NET MVC, " + ConfigurationManager.AppSettings["VIPName"];
+            ViewData["Message"] = "Welcome to ASP.NET MVC, " + ConfigurationManager.AppSettings["VIPName"];  //demo-quality MVC code
+            ViewData["PuttingEverythingInTheViewDataHashIsAnASPNETMVCBestPractice"] = this.GetType().Assembly.GetName().Version;  //demo-quality MVC code
 
             return View();
         }
