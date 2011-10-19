@@ -5,13 +5,13 @@ properties {
   $testResultsDirectory = ([IO.Path]::Combine((resolve-path .), "TestResults"))
   $testResultsFile = ([IO.Path]::Combine($testResultsDirectory, "TestResults.xml"))
   $environments = @('dev', 'qa', 'staging', 'test', 'training', 'acceptance', 'prod')
-  $versionNumber = "1.1.1.1" #Don't do this. for real version numbers, generate the version number in TeamCity and pass it into the script as an argument somehow.
+  $defaultVersionNumber = "1.1.1.1" #Don't do this. for real version numbers, generate the version number in TeamCity and pass it into the script as an argument somehow.
   $assemblyInfo = @{
     "title" = "HODUGWeb";
     "description" = 'Web application demo for HODUG';
     "company" = "HODUG Enterprises";
     "product" = "HODUGWeb";
-    "version" = $versionNumber;
+    "version" = $defaultVersionNumber;
     "copyright" = "Copyright 2011 HODUG Enterprises. All Rights Reserved";
   }
   
@@ -44,21 +44,14 @@ task build {
   Compile-Project -compilationTarget "Package"
 }
 
-task deployithManualXmlEdits {
-    if ($environment -eq $null) { throw 'Environment parameter is null but must be set to run a build with manual XML edits! Call psake with it set, e.g. ''psake -parameters @{"environment"="dev"}''' }
+task deploy {
+  if ($environment -eq $null) { throw 'Environment parameter is null but must be set to run a build with manual XML edits! Call psake with it set, e.g. ''psake -parameters @{"environment"="dev"}''' }
 
   Compile-Project -compilationTarget "Build"
-    
-    Copy -recurse -path ([IO.Path]::Combine($buildOutputDirectory, "_PublishedWebsites\MvcApplication3")) -destination $packageOutputDirectory
-    Change-WebConfigUsingNativeXmlSupport -folder $packageOutputDirectory -environment $environment
-}
-
-task dbmigrate {
-}
-
-task deploy {
-  #(Continuous Deployment) deploy from CI build to dev environment automatically
-  #powershell ./deploy.ps1 -name dev6 -port 81 -sourceFolder "'$buildDropFolder'"
+  
+  Copy -recurse -force -path ([IO.Path]::Combine($buildOutputDirectory, "_PublishedWebsites\DemoWebApp\*")) -destination $packageOutputDirectory
+  Change-WebConfigUsingNativeXmlSupport -folder $packageOutputDirectory -environment $environment
+  Copy -recurse -force -path ([IO.Path]::Combine($packageOutputDirectory, ".\*")) -destination "C:\wwwbingcom"
 }
 
 
@@ -110,6 +103,12 @@ function Generate-AssemblyInfo {
     [string]$version,
     [string]$file = $(throw "file is a required parameter.")
     )
+
+	  if (-not [string]::IsNullOrEmpty($versionNumber)) {
+	    Write-Host "Setting custom version to $versionNumber"
+	    $version = $versionNumber
+      }
+
       $commit = Get-GitCommit
       $asmInfo = @"
 using System;
@@ -155,6 +154,7 @@ function Get-VersionFromGitTag {
 #stolen from a blog post
 function Change-WebConfigUsingNativeXmlSupport($folder, $environment) {
   $filename = join-path $folder "web.config"
+  Write-Host "Editing XML for $filename"
   $webConfig = [xml](cat ($filename))
   $webConfig.configuration.appSettings.add `
     | ? { $appSettings[$environment].Keys -contains $_.key } `
